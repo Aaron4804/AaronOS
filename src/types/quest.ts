@@ -1,9 +1,8 @@
 export type Quest = {
-  id: string;
+  id: number;
   title: string;
   category: string;
   xp: number;
-  // optional fields that may be useful later
-  completed?: boolean;
+  completed: boolean;
   createdAt?: string;
 };
