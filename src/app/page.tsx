@@ -1,81 +1,56 @@
+import QuestCard from '../components/QuestCard';
+import type { Quest } from '../types/quest';
+
 export default function Home() {
+  // Sample quests stored locally for now. These will be replaced by Supabase data later.
+  const quests: Quest[] = [
+    { id: 'q1', title: '20 Min Cardio', category: 'Health', xp: 40, completed: false },
+    { id: 'q2', title: 'GitHub Commit', category: 'Career', xp: 60, completed: false },
+    { id: 'q3', title: 'Solve 2 LeetCode Problems', category: 'Learning', xp: 80, completed: false },
+  ];
+
   return (
-    <main className="min-h-screen bg-neutral-950 text-white">
-      <div className="max-w-7xl mx-auto p-8">
+    <main className="min-h-screen bg-black text-white px-8 py-10">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <header className="mb-10">
+        <div className="mb-10">
           <h1 className="text-5xl font-bold">AaronOS</h1>
-          <p className="text-neutral-400 mt-2">
-            Your AI Powered Life Operating System
-          </p>
-        </header>
+          <p className="text-gray-400 mt-2">Your AI Powered Life Operating System</p>
+        </div>
 
         {/* Stats */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-neutral-900 rounded-xl p-6">
-            <p className="text-neutral-400">Level</p>
-            <h2 className="text-3xl font-bold mt-2">1</h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl bg-zinc-900 p-6">
+            <p className="text-gray-400">Level</p>
+            <h2 className="mt-3 text-5xl font-bold">1</h2>
           </div>
 
-          <div className="bg-neutral-900 rounded-xl p-6">
-            <p className="text-neutral-400">XP</p>
-            <h2 className="text-3xl font-bold mt-2">0 / 500</h2>
+          <div className="rounded-2xl bg-zinc-900 p-6">
+            <p className="text-gray-400">XP</p>
+            <h2 className="mt-3 text-5xl font-bold">0 / 500</h2>
           </div>
 
-          <div className="bg-neutral-900 rounded-xl p-6">
-            <p className="text-neutral-400">Today's XP</p>
-            <h2 className="text-3xl font-bold mt-2">0</h2>
+          <div className="rounded-2xl bg-zinc-900 p-6">
+            <p className="text-gray-400">Today's XP</p>
+            <h2 className="mt-3 text-5xl font-bold">0</h2>
           </div>
 
-          <div className="bg-neutral-900 rounded-xl p-6">
-            <p className="text-neutral-400">Current Streak</p>
-            <h2 className="text-3xl font-bold mt-2">0 Days</h2>
+          <div className="rounded-2xl bg-zinc-900 p-6">
+            <p className="text-gray-400">Current Streak</p>
+            <h2 className="mt-3 text-5xl font-bold">0 Days</h2>
           </div>
-        </section>
+        </div>
 
-        {/* Today's Quests */}
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold mb-5">Today's Quests</h2>
+        {/* Quests */}
+        <section className="mt-14">
+          <h2 className="mb-6 text-3xl font-bold">Today's Quests</h2>
 
-          <div className="space-y-4">
-            <div className="bg-neutral-900 rounded-xl p-5 flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">20 Min Cardio</h3>
-                <p className="text-sm text-neutral-400">
-                  Health • +40 XP
-                </p>
-              </div>
-
-              <button className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg">
-                Complete
-              </button>
-            </div>
-
-            <div className="bg-neutral-900 rounded-xl p-5 flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">GitHub Commit</h3>
-                <p className="text-sm text-neutral-400">
-                  Career • +60 XP
-                </p>
-              </div>
-
-              <button className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg">
-                Complete
-              </button>
-            </div>
-
-            <div className="bg-neutral-900 rounded-xl p-5 flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold">Solve 2 LeetCode Problems</h3>
-                <p className="text-sm text-neutral-400">
-                  Learning • +80 XP
-                </p>
-              </div>
-
-              <button className="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-lg">
-                Complete
-              </button>
-            </div>
+          <div className="space-y-5">
+            {quests.length ? (
+              quests.map((q) => <QuestCard key={q.id} quest={q} />)
+            ) : (
+              <p className="text-gray-400">No quests for today.</p>
+            )}
           </div>
         </section>
       </div>
