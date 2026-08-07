@@ -1,19 +1,21 @@
-import React from 'react';
-import DashboardGrid from '@/components/dashboard/DashboardGrid';
-import { sampleStats, sampleQuests, sampleHeatmap, aiRecommendations } from '@/lib/mockData';
+import DashboardGrid from "@/components/dashboard/DashboardGrid";
 
-// Helper to pick last 7 days for the week view from sampleHeatmap
-function last7DaysWeek(heatmap: { date: string; xp: number }[]) {
-  const last7 = heatmap.slice(-7);
-  return last7;
-}
+import {
+  dashboardStats,
+  quests,
+  weeklyHeatmap,
+  aiRecommendations,
+} from "@/lib/mockData";
 
-export default function DashboardPage() {
-  const heatmapWeek = last7DaysWeek(sampleHeatmap);
-
+export default function HomePage() {
   return (
-    <section>
-      <DashboardGrid stats={sampleStats} quests={sampleQuests} heatmapWeek={heatmapWeek} aiRecommendations={aiRecommendations} />
-    </section>
+    <main className="space-y-8">
+      <DashboardGrid
+        stats={dashboardStats}
+        quests={quests}
+        heatmap={weeklyHeatmap}
+        aiTips={aiRecommendations}
+      />
+    </main>
   );
 }

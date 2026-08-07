@@ -28,10 +28,10 @@ export default function Heatmap({ week }: HeatmapProps) {
 
       <div className="grid grid-cols-7 gap-3">
 
-        {week.map((day) => (
+       {week.map((day, index) => (
 
-          <button
-            key={day.day}
+  <button
+    key={`${day.day}-${index}`}
             onClick={() => setSelected(day)}
             className={`aspect-square rounded-xl transition-all hover:scale-105 ${getColor(day.xp)}`}
           />
