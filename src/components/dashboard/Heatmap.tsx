@@ -13,10 +13,10 @@ type HeatmapProps = {
 
 function getColor(xp: number) {
   if (xp === 0) return "bg-zinc-800";
-  if (xp < 50) return "bg-red-500";
-  if (xp < 100) return "bg-orange-500";
-  if (xp < 200) return "bg-yellow-400";
-  return "bg-green-500";
+  if (xp < 50) return "bg-emerald-950";
+  if (xp < 100) return "bg-emerald-800";
+  if (xp < 200) return "bg-emerald-600";
+  return "bg-emerald-400";
 }
 
 export default function Heatmap({ week }: HeatmapProps) {
@@ -26,15 +26,18 @@ export default function Heatmap({ week }: HeatmapProps) {
   return (
     <div>
 
-      <div className="grid grid-cols-7 gap-3">
+      <div className="grid max-w-xl grid-cols-7 gap-2">
 
        {week.map((day, index) => (
 
   <button
     key={`${day.day}-${index}`}
+            type="button"
+            aria-label={`${day.day}, ${day.xp} XP`}
+            aria-pressed={selected?.day === day.day}
             onClick={() => setSelected(day)}
-            className={`aspect-square rounded-xl transition-all hover:scale-105 ${getColor(day.xp)}`}
-          />
+            className={`h-9 rounded-md text-xs ring-emerald-300 transition-colors hover:ring-1 aria-pressed:ring-1 ${getColor(day.xp)} ${day.xp >= 100 ? "text-emerald-950" : "text-zinc-200"}`}
+          >{day.day.slice(-2)}</button>
 
         ))}
 
@@ -49,12 +52,9 @@ export default function Heatmap({ week }: HeatmapProps) {
           </p>
 
           <h3 className="mt-2 text-2xl font-bold">
-            {selected.xp} XP
+            {week.find((day) => day.day === selected.day)?.xp ?? 0} XP
           </h3>
 
-          <p className="mt-2 text-zinc-400">
-            More detailed analytics coming soon...
-          </p>
 
         </div>
 

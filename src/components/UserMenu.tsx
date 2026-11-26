@@ -35,7 +35,7 @@ export default function UserMenu() {
   async function logout() {
     setLoading(true);
 
-    await supabase.auth.signOut();
+    await supabase?.auth.signOut();
 
     router.push("/auth/login");
     router.refresh();

@@ -1,0 +1,123 @@
+import { expect, test } from "@playwright/test";
+
+test("recurring quest, persistence, XP undo and full backup round trip", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page.getByRole("heading", { name: "Command Center" })).toBeVisible();
+  const openNavigation = page.getByRole("button", { name: "Open navigation" });
+  if (await openNavigation.isVisible()) await openNavigation.click();
+  await page.getByRole("navigation", { name: "Workspace navigation" }).getByRole("link", { name: "Quests", exact: true }).click();
+  await page.getByRole("button", { name: "Add Quest", exact: true }).click();
+  await page.locator("#quest-title").fill("Daily reading");
+  await page.getByLabel("Repeat every N days").fill("1");
+  const today = await page.getByLabel("Completion date").inputValue();
+  await page.getByLabel("Start date").fill(today);
+  await page.getByRole("dialog").getByRole("button", { name: "Add quest", exact: true }).click();
+  const quest = page.locator("#quests li").filter({ hasText: "Daily reading" });
+  await quest.getByRole("button", { name: "Complete", exact: true }).click();
+  await expect(quest.getByRole("button", { name: "Undo completion" })).toBeVisible();
+  await page.reload();
+  await expect(quest.getByRole("button", { name: "Undo completion" })).toBeVisible();
+  await quest.getByRole("button", { name: "Edit" }).click();
+  await page.locator("#quest-title").fill("Reading");
+  await page.getByRole("button", { name: "Save quest" }).click();
+  await expect(page.locator("#quests li").filter({ hasText: "Reading" })).toBeVisible();
+  await page.goto("/dashboard/settings");
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download full backup" }).click();
+  const backup = await download;
+  const path = (await backup.path())!;
+  await page.goto("/dashboard/quests");
+  await page.getByRole("button", { name: "Undo completion" }).click();
+  await expect(page.getByRole("button", { name: "Complete", exact: true })).toBeVisible();
+  await page.goto("/dashboard/settings");
+  await page.getByLabel("Choose backup to restore").setInputFiles(path);
+  await expect(page.getByRole("button", { name: "Replace data from backup" })).toBeDisabled();
+  await page.getByLabel("Type REPLACE to confirm").fill("REPLACE");
+  await page.getByRole("button", { name: "Replace data from backup" }).click();
+  await expect(page.getByLabel("Type REPLACE to confirm")).toHaveCount(0);
+  await page.goto("/dashboard/quests");
+  await expect(page.getByRole("button", { name: "Undo completion" })).toBeVisible();
+});
+
+test("food quantity snapshots and work timer persist", async ({ page }) => {
+  await page.goto("/dashboard/nutrition?kind=foods&add=1");
+  await page.getByLabel("Title", { exact: true }).fill("Test yogurt");
+  await page.getByLabel("Base quantity").fill("100");
+  await page.getByLabel("Protein (g)", { exact: true }).fill("26");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Log food" }).click();
+  await page.getByLabel("Quantity", { exact: true }).fill("50");
+  await expect(page.getByLabel("Protein (g)", { exact: true })).toHaveValue("13");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText(/13 g protein/)).toBeVisible();
+  await page.goto("/dashboard/nutrition?kind=foods");
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await page.getByLabel("Protein (g)", { exact: true }).fill("30");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.goto("/dashboard/nutrition?kind=meals");
+  await expect(page.getByText(/13 g protein/)).toBeVisible();
+  await page.goto("/dashboard/work?kind=work");
+  await page.getByRole("button", { name: "Start timer" }).click();
+  await expect(page.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await page.getByRole("button", { name: "Finish and save" }).click();
+  await expect(page.getByRole("heading", { name: /Active work/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+});
+
+test("workout and personal records synchronize with the dashboard", async ({ page }) => {
+  const create = async (path: string, title: string, fields: Record<string, string> = {}) => {
+    await page.goto("/dashboard/" + path + "&add=1");
+    await page.getByLabel("Title", { exact: true }).fill(title);
+    for (const [label, value] of Object.entries(fields)) {
+      const combo = page.locator("form").getByRole("combobox", { name: label, exact: true });
+      const input = await combo.count() ? combo : page.getByLabel(label, { exact: true });
+      if (await input.evaluate((node) => node.tagName === "SELECT")) await input.selectOption({ label: value });
+      else await input.fill(value);
+    }
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByRole("heading", { name: new RegExp(title) })).toBeVisible();
+  };
+  await create("fitness?kind=exercises", "Squat");
+  await create("fitness?kind=plans", "Legs");
+  await page.getByRole("button", { name: "Log workout from plan" }).click();
+  await page.getByRole("button", { name: "Start this workout timer" }).click();
+  await expect(page.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+  await page.goto("/dashboard/fitness?kind=workouts");
+  await page.getByRole("button", { name: "Finish and save" }).click();
+  await page.getByRole("button", { name: "Add set", exact: true }).click();
+  await page.locator("form").getByRole("combobox", { name: "Exercise", exact: true }).selectOption({ label: "Squat" });
+  await page.getByLabel("Weight", { exact: true }).fill("60");
+  await page.getByLabel("Reps", { exact: true }).fill("5");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByText("Exercise history and personal records", { exact: true }).click();
+  await expect(page.getByText(/60 kg best lift/)).toBeVisible();
+  await create("nutrition?kind=measurements", "Morning weight", { Weight: "72" });
+  await create("work?kind=projects", "Demo project", { Status: "In Progress", "Progress (%)": "50" });
+  await create("wellness?kind=habits", "Drink water");
+  await page.getByRole("button", { name: "Log habit" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await create("personal?kind=finance", "Coffee", { Amount: "10" });
+  await create("personal?kind=events", "Dentist");
+  await create("personal?kind=journal", "Day one", { Entry: "Worked on AaronOS" });
+  await page.goto("/dashboard");
+  await expect(page.getByText("72 kg", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("-10 INR", { exact: true })).toBeVisible();
+});
+
+test("settings control dashboard navigation and card visibility", async ({ page }) => {
+  await page.goto("/dashboard/settings");
+  await page.getByRole("button", { name: "Edit preferences" }).click();
+  await page.getByRole("group", { name: "Modules to hide from navigation" }).getByRole("checkbox", { name: "coding" }).check();
+  await page.getByRole("group", { name: "Dashboard cards and order" }).getByRole("checkbox", { name: "Latest weight", exact: true }).uncheck();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("heading", { name: /Preferences/ })).toBeVisible();
+  await page.goto("/dashboard");
+  const nav = page.getByRole("navigation", { name: "Trackers" });
+  await expect(nav.getByRole("link", { name: "coach" })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "coding" })).toHaveCount(0);
+  await expect(page.getByText("Latest weight", { exact: true })).toHaveCount(0);
+  await nav.getByRole("link", { name: "coach" }).click();
+  await expect(page.getByRole("heading", { name: "Personal coach" })).toBeVisible();
+});

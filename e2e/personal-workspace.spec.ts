@@ -1,0 +1,58 @@
+import { test, expect } from "@playwright/test";
+
+test("calendar and journal preserve edits across a mobile or desktop reload", async ({ page },info) => {
+  await page.goto("/dashboard/personal?kind=events");
+  const calendar = page.getByRole("heading", { name:/Daily agenda/ });
+  await expect(calendar).toBeVisible();
+  const initial = await calendar.textContent();
+  await page.getByRole("button",{name:"Next period"}).click();
+  await expect(calendar).not.toHaveText(initial!);
+  await page.getByRole("button",{name:"Today",exact:true}).click();
+  await page.getByRole("button",{name:"Add event",exact:true}).first().click();
+  const event = page.getByRole("dialog",{name:"Calendar event"});
+  await event.getByLabel("Title",{exact:true}).fill("Planning appointment");
+  await event.getByLabel("Category",{exact:true}).fill("Planning");
+  await event.getByRole("button",{name:"Save",exact:true}).click();
+  await page.getByRole("button",{name:"Planning appointment",exact:true}).click();
+  await event.getByLabel("Title",{exact:true}).fill("Weekly planning");
+  await event.getByRole("button",{name:"Save",exact:true}).click();
+  await page.reload();
+  await expect(page.getByRole("button",{name:"Weekly planning",exact:true})).toBeVisible();
+  await page.screenshot({path:info.outputPath("calendar.png")});
+  await page.goto("/dashboard/personal?kind=journal");
+  await page.getByRole("button",{name:"Write entry"}).click();
+  const journal=page.getByRole("dialog",{name:"Journal entry"});
+  await journal.getByLabel("Title",{exact:true}).fill("Daily reflection");
+  await journal.getByLabel("Tags",{exact:true}).fill("reflection");
+  await journal.getByRole("combobox",{name:"Favorite"}).selectOption("Yes");
+  await journal.getByLabel("Entry",{exact:true}).fill("Made time for the things that matter.");
+  await page.screenshot({path:info.outputPath("journal.png")});
+  await journal.getByRole("button",{name:"Save",exact:true}).click();
+  await expect(journal).toHaveCount(0);
+  await page.reload();
+  await page.getByRole("button",{name:"Daily reflection",exact:true}).click();
+  await expect(journal.getByLabel("Entry",{exact:true})).toHaveValue("Made time for the things that matter.");
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+});
+
+test("a meal template retains its macro snapshot and can be logged again", async ({ page }) => {
+  await page.goto("/dashboard/nutrition?kind=meals");
+  await page.getByRole("button",{name:"Add food to Breakfast",exact:true}).click();
+  const food = page.getByRole("dialog");
+  await food.getByLabel("Title",{exact:true}).fill("Morning meal");
+  await food.getByLabel("Calories (kcal)",{exact:true}).fill("320");
+  await food.getByLabel("Protein (g)",{exact:true}).fill("24");
+  await food.getByRole("button",{name:"Save",exact:true}).click();
+  await expect(food).toHaveCount(0);
+  await page.getByRole("button",{name:"Save day as meal template"}).click();
+  const template=page.getByRole("dialog",{name:"Save meal template"});
+  await template.getByLabel("Title",{exact:true}).fill("Repeatable breakfast");
+  await template.getByRole("button",{name:"Save",exact:true}).click();
+  await page.getByRole("button",{name:"Use template"}).click();
+  await expect(food.getByLabel("Calories (kcal)",{exact:true})).toHaveValue("320");
+  await expect(food.getByLabel("Protein (g)",{exact:true})).toHaveValue("24");
+  await food.getByRole("button",{name:"Save",exact:true}).click();
+  await expect(food).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByText("Repeatable breakfast",{exact:true}).first()).toBeVisible();
+});

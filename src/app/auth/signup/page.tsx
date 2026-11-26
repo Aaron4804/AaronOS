@@ -17,6 +17,10 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!supabase) {
+      setError("Configure the Supabase URL and publishable key first.");
+      return;
+    }
 
     setLoading(true);
     setError("");

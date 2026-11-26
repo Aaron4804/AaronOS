@@ -12,6 +12,11 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
+/playwright/.auth/
+/blob-report/
+*.trace.zip
 
 # next.js
 /.next/
@@ -23,6 +28,19 @@
 # misc
 .DS_Store
 *.pem
+*.key
+*.p12
+*.pfx
+/backups/
+/exports/
+/personal-data/
+/aaronos-*.json
+/aaronos-*.csv
+/.supabase/
+/supabase/.temp/
+/.vscode/
+/AGENTS.md
+/CLAUDE.md
 
 # debug
 npm-debug.log*
@@ -32,6 +50,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel

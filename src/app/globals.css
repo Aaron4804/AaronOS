@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --font-heading: system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -127,4 +127,46 @@
   html {
     @apply font-sans;
   }
+}
+.os-shell { --rail: 14rem; min-height: 100vh; background: #101212; color: #edf2ef; }
+.os-sidebar { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+@media (max-width:760px) {
+  .os-shell input:not([type=checkbox]), .os-shell select, .os-shell textarea { font-size:16px; }
+  .os-shell input[type=number], .os-dialog input[type=number] { min-height:44px; }
+  .os-topbar :is(button, a, summary) { min-width:36px; min-height:44px; display:inline-flex; align-items:center; justify-content:center; }
+}
+.os-shell[data-collapsed=true] { --rail: 8.25rem; }
+.os-sidebar { width:var(--rail); position:fixed; inset:0 auto 0 0; background:#151817; border-right:1px solid #272d29; display:flex; flex-direction:column; z-index:50; }
+.os-brand { display:flex; align-items:center; justify-content:space-between; min-height:64px; padding:0 14px; border-bottom:1px solid #272d29; }
+.os-brand a,.os-sidebar summary,.os-sidebar-foot { display:flex; align-items:center; gap:9px; }
+.os-brand a { color:#8be9be; font-weight:750; letter-spacing:-.04em; }
+.os-sidebar nav { padding:12px; overflow:auto; flex:1; }
+.os-sidebar details { margin-bottom:12px; }
+.os-sidebar summary { cursor:pointer; padding:6px; color:#90a39a; font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.07em; }
+.os-sidebar nav a { display:block; padding:6px 10px; margin:2px 0; border-radius:7px; font-size:13px; color:#c1cdc6; }
+.os-sidebar nav a:hover,.os-sidebar nav a[aria-current=page] { background:#21352b; color:#92efc4; }
+.os-sidebar-foot { border-top:1px solid #272d29; padding:13px; font-size:11px; color:#9fab9f; }
+.os-main { margin-left:var(--rail); min-width:0; }
+.os-topbar { position:sticky; top:0; display:flex; align-items:center; gap:16px; min-height:64px; z-index:40; padding:8px 24px; background:#151817f5; border-bottom:1px solid #272d29; }
+.os-crumb { display:flex; gap:10px; align-items:center; flex:1; min-width:0; font-size:13px; }
+.os-crumb span,.os-topbar time { color:#9ca9a1; }
+.os-topbar time { font-size:12px; white-space:nowrap; }
+.os-profile { position:relative; }.os-profile summary { list-style:none; cursor:pointer; }.os-profile > div { position:absolute; right:0; width:12rem; background:#1e2420; border:1px solid #39433b; padding:12px; border-radius:10px; }.os-profile a { display:flex; gap:8px; margin-bottom:8px; }
+.os-content { margin:0 auto; width:100%; max-width:88rem; padding:26px clamp(16px,3vw,40px); }
+.os-title { letter-spacing:-.045em; font-weight:750; font-size:clamp(1.8rem,3vw,2.65rem); }
+.os-mobile,.os-scrim { display:none; }
+.os-panel { background:#191d1b; border:1px solid #2a332d; border-radius:16px; padding:18px; }
+.os-hero { background:#172a21; border:1px solid #345544; border-radius:20px; padding:22px; }
+.os-dialog { margin:auto; width:min(92vw, 42rem); max-height:88dvh; overflow:auto; background:#191d1b; color:#edf2ef; border:1px solid #3d4b42; border-radius:18px; padding:22px; }
+.os-dialog::backdrop { background:#000a; backdrop-filter:blur(3px); }
+@media(max-width: 760px) {
+ .os-sidebar { visibility:hidden; transform:translateX(-105%); transition:transform .18s ease; width:min(80vw,16rem); }
+ .os-sidebar[data-open=true] { visibility:visible; transform:none; }.os-main { margin-left:0; }
+ .os-mobile,.os-scrim { display:block; }.os-scrim { position:fixed; inset:0; background:#0009; z-index:49; }
+ .os-topbar { padding:8px 12px; gap:10px; }.os-topbar time,.os-crumb span,.os-collapse { display:none; }
+}
+.os-content { padding-bottom:max(26px, env(safe-area-inset-bottom)); }
+.os-topbar { padding-top:calc(8px + env(safe-area-inset-top)); }
+@media (max-width:760px) {
+  .os-content { padding-left:max(16px, env(safe-area-inset-left)); padding-right:max(16px, env(safe-area-inset-right)); }
 }

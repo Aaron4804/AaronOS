@@ -15,6 +15,10 @@ export default function LoginPage() {
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!supabase) {
+      setError("Configure the Supabase URL and publishable key first.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -32,6 +36,7 @@ export default function LoginPage() {
     }
 
     router.push("/dashboard");
+    router.refresh();
   }
 
   return (
